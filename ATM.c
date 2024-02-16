@@ -8,7 +8,6 @@ typedef struct Account
     int accountNumber;
     int accountPIN[4];
     int confirmAccountPin[4];
-
     char name[50];
     float accountBalance;
 } Account;
@@ -19,7 +18,6 @@ int numAccounts = 0;
 void createAccount(Account *account)
 {
     bool validAccountNumber = false;
-
     while (!validAccountNumber)
     {
         printf("Welcome to this bank!\nPlease enter your 10-digit account number: ");
@@ -59,7 +57,7 @@ void createAccount(Account *account)
     for (int i = 0; i < 4; i++)
     {
         scanf("%1d", &account->accountPIN[i]);
-        printf("x");
+        printf("%c", 'x');
     }
     printf("\n");
 
@@ -67,7 +65,7 @@ void createAccount(Account *account)
     for (int i = 0; i < 4; i++)
     {
         scanf("%1d", &account->confirmAccountPin[i]);
-        printf("x");
+        printf("%c", 'x');
     }
     printf("\n");
 
@@ -109,7 +107,7 @@ void checkAccountBalance(int accountNumber)
     int index = findAccount(accountNumber);
     if (index != -1)
     {
-        printf("Your account balance is: %.2f\n", accounts[index].accountBalance);
+        printf("Your account balance is: $%.2f\n", accounts[index].accountBalance);
     }
     else
     {
@@ -163,11 +161,46 @@ void withdraw(int accountNumber, float amount)
     }
 }
 
+void saveAccountsToFile()
+{
+    FILE *file = fopen("accounts.dat", "wb");
+    if (file == NULL)
+    {
+        printf("Error: Unable to open the file for saving.\n");
+        exit(1); // terminate with error
+    }
+
+    fwrite(accounts, sizeof(Account), numAccounts, file);
+    fclose(file);
+}
+
+void loadAccountsFromFile()
+{
+    FILE *file = fopen("accounts.dat", "rb");
+    if (file == NULL)
+    {
+        printf("Error! File is unable to be opened for loading.\n");
+        return;
+    }
+
+    fread(accounts, sizeof(Account), 100, file);
+    fclose(file);
+
+    int i = 0;
+    while (i < 100 && accounts[i].accountNumber != 0)
+    {
+        numAccounts++;
+        i++;
+    }
+}
+
 int main()
 {
     printf("Welcome to Prime Bank!\n");
     char response;
     Account newAccount = {0};
+
+    loadAccountsFromFile();
 
     do
     {
@@ -191,47 +224,47 @@ int main()
 
             switch (choice)
             {
-                case 1:
-                    createAccount(&newAccount);
-                    break;
-                case 2:
-                    int accountNumber;
-                    printf("Enter an account number: ");
-                    scanf("%d", &accountNumber);
-                    checkAccountBalance(accountNumber);
-                    break;
-                case 3:
-                    int accountNumber2;
-                    printf("Enter your account number: ");
-                    scanf("%d", &accountNumber2);
-                    deposit(accountNumber2);
-                    break;
-                case 4:
-                    int accountNumber3;
-                    float amount;
-                    printf("Enter your account number: ");
-                    scanf("%d", &accountNumber3);
-                    printf("Enter the amount needed to withdraw: ");
-                    scanf("%f", &amount);
-                    withdraw(accountNumber3, amount);
-                    break;
-                case 5:
-                    int accountNumber4;
-                    float newPIN;
-                    printf("Enter your account number: ");
-                    scanf("%d", &accountNumber4);
-                    printf("Input a new PIN: ");
-                    scanf("%f", &newPIN);
-                    // Update the PIN for the account
-                    break;
-                case 6:
-                    // Enquiries option can be implemented here
-                    printf("Enquiries are not yet available.\nPlease try again later or go to your bank for any enquiries.\n");
-                    break;
-                case 7:
-                    exit(0);
-                default:
-                    printf("Invalid choice. Please try again.\n");
+            case 1:
+                createAccount(&newAccount);
+                break;
+            case 2:
+                int accountNumber;
+                printf("Enter an account number: ");
+                scanf("%d", &accountNumber);
+                checkAccountBalance(accountNumber);
+                break;
+            case 3:
+                int accountNumber2;
+                printf("Enter your account number: ");
+                scanf("%d", &accountNumber2);
+                deposit(accountNumber2);
+                break;
+            case 4:
+                int accountNumber3;
+                float amount;
+                printf("Enter your account number: ");
+                scanf("%d", &accountNumber3);
+                printf("Enter the amount needed to withdraw: ");
+                scanf("%f", &amount);
+                withdraw(accountNumber3, amount);
+                break;
+            case 5:
+                int accountNumber4;
+                float newPIN;
+                printf("Enter your account number: ");
+                scanf("%d", &accountNumber4);
+                printf("Input a new PIN: ");
+                scanf("%f", &newPIN);
+                // Update the PIN for the account
+                break;
+            case 6:
+                // Enquiries option can be implemented here
+                printf("Enquiries are not yet available. Please try again later or go to your bank for any enquiries.\n");
+                break;
+            case 7:
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
             }
         }
         else if (response == 'N' || response == 'n')
@@ -246,5 +279,6 @@ int main()
         }
     } while (1);
 
+    saveAccountsToFile();
     return 0;
 }
