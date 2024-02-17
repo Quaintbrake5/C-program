@@ -170,7 +170,13 @@ void saveAccountsToFile()
         exit(1); // terminate with error
     }
 
-    fwrite(accounts, sizeof(Account), numAccounts, file);
+    int numBytesWritten = fwrite(accounts, sizeof(Account), numAccounts, file);
+    if (numBytesWritten != numAccounts * sizeof(Account))
+    {
+        printf("Error: Unable to write all accounts to the file.\n");
+        exit(1); // terminate with error
+    }
+
     fclose(file);
 }
 
@@ -183,15 +189,15 @@ void loadAccountsFromFile()
         return;
     }
 
-    fread(accounts, sizeof(Account), 100, file);
-    fclose(file);
-
-    int i = 0;
-    while (i < 100 && accounts[i].accountNumber != 0)
+    int numBytesRead = fread(accounts, sizeof(Account), 100, file);
+    if (numBytesRead < numAccounts * sizeof(Account))
     {
-        numAccounts++;
-        i++;
+        printf("Error: Unable to read all accounts from the file.\n");
+        exit(1); // terminate with error
     }
+
+    numAccounts = numBytesRead / sizeof(Account);
+    fclose(file);
 }
 
 int main()
